@@ -87,7 +87,7 @@ function Home() {
       <div className="jobs-container" style={{ marginTop: '1rem' }}>
         {JOBS.slice(0, 4).map(item => (
           <Link key={item.index} to={`/jobs/${item.index}`} className="job-listings-link">
-            <div className="jList">
+            <div className="jList card-clickable">
               <img src={item.image} alt={`${item.companyName} logo`} />
               <h3>{item.title}</h3>
               <p>{item.rate}</p>
@@ -186,10 +186,10 @@ function JobsList() {
         ))}
       </ul>
 
-      <div className="jobs-container">
+            <div className="jobs-container">
         {filtered.map(item => (
           <Link key={item.index} to={`/jobs/${item.index}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="jlist" data-item={(item.av||'').toLowerCase().replace(/\s+/g, '')} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid #eee', padding: 12 }}>
+            <div className="jlist card-clickable" data-item={(item.av||'').toLowerCase().replace(/\s+/g, '')}>
               <img src={item.image} alt={`${item.title} logo`} width="40" height="40" />
               <div>
                 <h3 style={{ margin: 0 }}>{item.title}</h3>

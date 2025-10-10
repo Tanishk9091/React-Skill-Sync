@@ -1,34 +1,77 @@
 :root {
-  --primary-color: #00a9ff;
-  --accent-color: #ffde59;
-  --text-dark: #111827;
+  /* Professional color palette */
+  --primary-color: #0B4A6F; /* deep teal/blue */
+  --primary-dark: #07263b;  /* darker footer / accents */
+  --accent-color: #FFB86B;  /* warm, muted orange */
+  --text-dark: #0F1724;     /* very dark slate */
   --text-light: #ffffff;
   --text-muted: #6b7280;
-  --light-bg: #f9fafb;
+  --light-bg: #F5F7FA;      /* soft off-white */
+  --surface: #ffffff;      /* card / surface background */
+  --border: #e6e6e6;       /* subtle border */
 }
 
 /* Port key classes from login.css used by React pages */
 .sec-space { padding: 5rem 0; }
 .obj-width { max-width: 1200px; margin: auto; padding: 0 20px; }
 .logo-text { font-family: Poppins, sans-serif; font-size: 2rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
-.job-filter-horizontal { display: flex; list-style: none; padding: 0; border: 1px solid #ccc; border-radius: 8px; background-color: gray; margin-top: 2rem; }
-.job-filter-horizontal li { padding: 20px 0; cursor: pointer; text-align: center; flex-grow: 1; }
-.job-filter-horizontal li.active { background-color: #51a995; color: #fff; border-radius: 8px; padding: 20px; }
-.jobs-container { display: grid; gap: 12px; margin-top: 16px; }
-.jlist { display: flex; align-items: center; gap: 12px; border: 1px solid #eee; padding: 12px; border-radius: 8px; background: #fff; }
+.job-filter-horizontal {
+  display: flex;
+  list-style: none;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--light-bg);
+  margin-top: 2rem;
+  gap: 8px;
+  overflow: hidden;
+}
+.job-filter-horizontal li {
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: center;
+  flex: 1 1 auto;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+.job-filter-horizontal li.active {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border-radius: 6px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+.jobs-container { display: grid; gap: 12px; margin-top: 16px; padding: 0.75rem; }
+.jlist { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: var(--surface); }
 
 /* About/Contact helpers */
 .container-page { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 .page-container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-.card { background: #fff; border: 1px solid #eee; border-radius: 15px; padding: 22px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 15px; padding: 22px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+.card-clickable { cursor: pointer; border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: var(--surface); transition: box-shadow 0.2s ease, transform 0.15s ease; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px; }
 .badges { display: flex; gap: 8px; flex-wrap: wrap; }
-.badge { padding: 6px 10px; border: 1px solid #e6e6e6; border-radius: 999px; font-size: 12px; color: var(--text-muted); background: #fff; }
+.badge { padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; color: var(--text-muted); background: var(--surface); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; background: var(--primary-color); color: var(--text-light); border: 0; border-radius: 10px; font-weight: 600; cursor: pointer; }
-.btn.ghost { background: transparent; border: 1px solid #e0e0e0; color: var(--text-dark); }
+.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dark); }
 .small { font-size: 12px; color: var(--text-muted); }
 
 /* Simple layout resets used by App */
 body { margin: 0; font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--light-bg); color: var(--text-dark); }
+
+/* Prevent layout overflow caused by wide children */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Ensure job lists never exceed their container */
+.jobs-container, .jobs.jobs-container { max-width: 100%; overflow: hidden; }
+.jList, .jlist { width: 100%; box-sizing: border-box; }
+.jList img, .jlist img { max-width: 48px; height: auto; }
+.jobs .jlist { flex-wrap: wrap; gap: 12px; }
+
+/* Extra guards: ensure children don't overflow horizontally */
+.jobs-container > * { max-width: 100%; box-sizing: border-box; }
+.jobs-container a.job-listings-link { display: block; max-width: 100%; }
+.jobs-container .jlist { margin: 0; }
+.jobs-container { overflow-x: hidden; }
 
