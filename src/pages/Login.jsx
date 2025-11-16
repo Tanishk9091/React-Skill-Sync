@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { hashPassword } from '../utils/crypto'
+// no client-side hashing for now — plaintext fallback per your request
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('')
@@ -28,21 +28,26 @@ export default function LoginPage({ onLogin }) {
           const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
           if (res.ok) {
             onLogin?.(email)
+            alert('Login successful')
             setShowModal(true)
             setTimeout(() => navigate('/'), 1200)
             return
+          } else {
+            const body = await res.json().catch(()=>({}))
+            alert('Login failed: ' + (body.error || res.statusText))
           }
         } catch (err) {
           console.warn('Server login failed, falling back to local check', err)
+          alert('Server unreachable — attempting local login')
         }
 
-        // fallback: check localStorage users (passwords stored as SHA-256 hash)
+        // fallback: check localStorage users (plaintext fallback per your request)
         try {
           const users = JSON.parse(localStorage.getItem('users') || '[]')
-          const hashed = await hashPassword(password)
-          const found = users.find(u => u.email === email && u.password === hashed)
+          const found = users.find(u => u.email === email && u.password === password)
           if (found) {
             onLogin?.(email)
+            alert('Local login successful')
             setShowModal(true)
             setTimeout(() => navigate('/'), 1200)
             return
@@ -51,7 +56,8 @@ export default function LoginPage({ onLogin }) {
           console.error('Local login check failed', err)
         }
 
-        setErrors({ form: 'Login failed. Check credentials.' })
+        // final failure
+        alert('Login failed. Check credentials.')
       })()
     }
   }

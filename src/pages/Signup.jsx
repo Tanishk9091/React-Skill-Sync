@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { hashPassword } from '../utils/crypto'
+// no client-side hashing — store plaintext in localStorage fallback as requested
 
 export default function SignupPage({ onSignup }) {
   const [name, setName] = useState('')
@@ -41,24 +41,31 @@ export default function SignupPage({ onSignup }) {
           })
           if (res.ok) {
             onSignup?.({ name, email })
+            // inform user
+            alert('Signup successful — you may now login')
             setShowModal(true)
             setTimeout(() => navigate('/login'), 1200)
             return
+          } else {
+            const body = await res.json().catch(()=>({}))
+            alert('Signup failed: ' + (body.error || res.statusText))
           }
           // if server returns error, fallback to local save below
         } catch (err) {
           console.warn('Server signup failed, falling back to localStorage', err)
+          alert('Server unreachable — saving account locally for demo')
         }
 
         // fallback: persist user locally so login can be used later
         try {
           const users = JSON.parse(localStorage.getItem('users') || '[]')
-          // hash the password before saving locally to avoid plaintext storage
-          const hashed = await hashPassword(password)
-          users.push({ name, email, password: hashed })
+          // plaintext fallback per your instruction (dev/demo only)
+          users.push({ name, email, password })
           localStorage.setItem('users', JSON.stringify(users))
+          alert('Account saved locally (demo only). You can now login.')
         } catch (err) {
           console.error('Failed to save user to localStorage', err)
+          alert('Failed to save user locally')
         }
         onSignup?.({ name, email })
         setShowModal(true)
