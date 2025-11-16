@@ -21,18 +21,34 @@ export default function Contact() {
       setStatus('Please enter a valid email address.')
       return
     }
+    setStatus('Sending...')
+    ;(async () => {
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: data.name, email: data.email, message: data.message })
+        })
+        if (res.ok) {
+          setStatus('Thanks! We received your message.')
+          form.reset()
+          return
+        }
+      } catch (err) {
+        console.warn('Contact POST failed, saving locally', err)
+      }
 
-    // Save submission locally so you can review it later in devtools/localStorage
-    try {
-      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
-      messages.push({ name: data.name, email: data.email, message: data.message, submittedAt: new Date().toISOString() })
-      localStorage.setItem('contactMessages', JSON.stringify(messages))
-      setStatus('Thanks! Your message was saved locally.');
-      form.reset()
-    } catch (err) {
-      console.error('Failed to save contact message', err)
-      setStatus('There was an error saving your message locally.')
-    }
+      // fallback to local storage
+      try {
+        const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+        messages.push({ name: data.name, email: data.email, message: data.message, submittedAt: new Date().toISOString() })
+        localStorage.setItem('contactMessages', JSON.stringify(messages))
+        setStatus('Saved locally (server not available).')
+        form.reset()
+      } catch (err) {
+        console.error('Failed to save contact message', err)
+        setStatus('There was an error saving your message locally.')
+      }
+    })()
   }
   return (
     <main className="sec-space">

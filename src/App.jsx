@@ -252,31 +252,56 @@ function JobDetail() {
               if (Object.keys(next).length === 0) {
                 setSubmitting(true)
                 try {
-                  // read resume as base64 (small files only)
-                  let resumeData = null
-                  if (form.resume) {
-                    resumeData = await new Promise((resolve, reject) => {
-                      const reader = new FileReader()
-                      reader.onload = () => resolve(reader.result)
-                      reader.onerror = reject
-                      reader.readAsDataURL(form.resume)
-                    })
+                  // try server upload first
+                  const formData = new FormData()
+                  formData.append('jobId', job.index)
+                  formData.append('jobTitle', job.title)
+                  formData.append('name', form.name)
+                  formData.append('email', loggedEmail)
+                  formData.append('qualification', form.qualification)
+                  formData.append('experience', form.experience)
+                  formData.append('cover', form.cover)
+                  if (form.resume) formData.append('resume', form.resume)
+
+                  let posted = false
+                  try {
+                    const res = await fetch('/api/apply', { method: 'POST', body: formData })
+                    if (res.ok) {
+                      posted = true
+                      setSuccess(true)
+                    }
+                  } catch (err) {
+                    console.warn('Server apply failed, falling back to local save', err)
                   }
-                  const applications = JSON.parse(localStorage.getItem('applications') || '[]')
-                  applications.push({
-                    jobId: job.index,
-                    jobTitle: job.title,
-                    name: form.name,
-                    email: loggedEmail,
-                    qualification: form.qualification,
-                    experience: form.experience,
-                    cover: form.cover,
-                    resumeName: form.resume ? form.resume.name : null,
-                    resumeData,
-                    appliedAt: new Date().toISOString()
-                  })
-                  localStorage.setItem('applications', JSON.stringify(applications))
-                  setSuccess(true)
+
+                  if (!posted) {
+                    // fallback: read resume as base64 and save in localStorage
+                    let resumeData = null
+                    if (form.resume) {
+                      resumeData = await new Promise((resolve, reject) => {
+                        const reader = new FileReader()
+                        reader.onload = () => resolve(reader.result)
+                        reader.onerror = reject
+                        reader.readAsDataURL(form.resume)
+                      })
+                    }
+                    const applications = JSON.parse(localStorage.getItem('applications') || '[]')
+                    applications.push({
+                      jobId: job.index,
+                      jobTitle: job.title,
+                      name: form.name,
+                      email: loggedEmail,
+                      qualification: form.qualification,
+                      experience: form.experience,
+                      cover: form.cover,
+                      resumeName: form.resume ? form.resume.name : null,
+                      resumeData,
+                      appliedAt: new Date().toISOString()
+                    })
+                    localStorage.setItem('applications', JSON.stringify(applications))
+                    setSuccess(true)
+                  }
+
                   // clear form after success
                   setForm({ name: loggedEmail ? loggedEmail.split('@')[0] : '', qualification: '', experience: '', cover: '', resume: null })
                   setTimeout(() => { setShowApply(false); setSuccess(false) }, 1400)

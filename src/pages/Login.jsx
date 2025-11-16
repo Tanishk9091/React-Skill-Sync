@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { hashPassword } from '../utils/crypto'
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('')
@@ -21,12 +22,37 @@ export default function LoginPage({ onLogin }) {
     if (!password.trim()) next.password = 'Password is required.'
     setErrors(next)
     if (Object.keys(next).length === 0) {
-      onLogin?.(email)
-      // show modal confirmation then redirect to home
-      setShowModal(true)
-      setTimeout(() => {
-        navigate('/')
-      }, 1200)
+      ;(async () => {
+        // try server login first
+        try {
+          const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
+          if (res.ok) {
+            onLogin?.(email)
+            setShowModal(true)
+            setTimeout(() => navigate('/'), 1200)
+            return
+          }
+        } catch (err) {
+          console.warn('Server login failed, falling back to local check', err)
+        }
+
+        // fallback: check localStorage users (passwords stored as SHA-256 hash)
+        try {
+          const users = JSON.parse(localStorage.getItem('users') || '[]')
+          const hashed = await hashPassword(password)
+          const found = users.find(u => u.email === email && u.password === hashed)
+          if (found) {
+            onLogin?.(email)
+            setShowModal(true)
+            setTimeout(() => navigate('/'), 1200)
+            return
+          }
+        } catch (err) {
+          console.error('Local login check failed', err)
+        }
+
+        setErrors({ form: 'Login failed. Check credentials.' })
+      })()
     }
   }
 

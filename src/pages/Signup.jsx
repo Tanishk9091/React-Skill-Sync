@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { hashPassword } from '../utils/crypto'
 
 export default function SignupPage({ onSignup }) {
   const [name, setName] = useState('')
@@ -31,20 +32,38 @@ export default function SignupPage({ onSignup }) {
     else if (!validatePassword(password)) next.password = 'Password must be at least 8 characters and include upper & lower case letters and a number.'
     setErrors(next)
     if (Object.keys(next).length === 0) {
-      onSignup?.({ name, email })
-      // persist user locally so login can be used later
-      try {
-        const users = JSON.parse(localStorage.getItem('users') || '[]')
-        users.push({ name, email, password })
-        localStorage.setItem('users', JSON.stringify(users))
-      } catch (err) {
-        console.error('Failed to save user to localStorage', err)
-      }
-      setShowModal(true)
-      // redirect to login after brief delay
-      setTimeout(() => {
-        navigate('/login')
-      }, 1200)
+      // prefer server signup, fallback to localStorage
+      (async () => {
+        try {
+          const res = await fetch('/api/signup', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+          })
+          if (res.ok) {
+            onSignup?.({ name, email })
+            setShowModal(true)
+            setTimeout(() => navigate('/login'), 1200)
+            return
+          }
+          // if server returns error, fallback to local save below
+        } catch (err) {
+          console.warn('Server signup failed, falling back to localStorage', err)
+        }
+
+        // fallback: persist user locally so login can be used later
+        try {
+          const users = JSON.parse(localStorage.getItem('users') || '[]')
+          // hash the password before saving locally to avoid plaintext storage
+          const hashed = await hashPassword(password)
+          users.push({ name, email, password: hashed })
+          localStorage.setItem('users', JSON.stringify(users))
+        } catch (err) {
+          console.error('Failed to save user to localStorage', err)
+        }
+        onSignup?.({ name, email })
+        setShowModal(true)
+        setTimeout(() => navigate('/login'), 1200)
+      })()
     }
   }
 
