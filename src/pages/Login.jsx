@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
+  const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate()
 
   const validateEmail = (value) => {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -19,12 +22,24 @@ export default function LoginPage({ onLogin }) {
     setErrors(next)
     if (Object.keys(next).length === 0) {
       onLogin?.(email)
-      alert('Login Successful! Redirecting...')
+      // show modal confirmation then redirect to home
+      setShowModal(true)
+      setTimeout(() => {
+        navigate('/')
+      }, 1200)
     }
   }
 
   return (
     <main>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h4>Login Successful</h4>
+            <p>Redirecting to Home...</p>
+          </div>
+        </div>
+      )}
       <div className="container">
         <h3>Login</h3>
         <form onSubmit={submit}>

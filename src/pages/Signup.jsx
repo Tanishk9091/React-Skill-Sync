@@ -1,14 +1,24 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function SignupPage({ onSignup }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
+  const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate()
 
   const validateEmail = (value) => {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     return re.test(String(value).toLowerCase())
+  }
+
+  const validatePassword = (value) => {
+    // Minimum 8 characters, at least one uppercase, one lowercase, and one number
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
+    return re.test(value)
+  
   }
 
   const submit = (e) => {
@@ -18,15 +28,36 @@ export default function SignupPage({ onSignup }) {
     if (!email.trim()) next.email = 'Email is required.'
     else if (!validateEmail(email)) next.email = 'Please enter a valid email address.'
     if (!password.trim()) next.password = 'Password is required.'
+    else if (!validatePassword(password)) next.password = 'Password must be at least 8 characters and include upper & lower case letters and a number.'
     setErrors(next)
     if (Object.keys(next).length === 0) {
       onSignup?.({ name, email })
-      alert('Signup successful! You can now log in.')
+      // persist user locally so login can be used later
+      try {
+        const users = JSON.parse(localStorage.getItem('users') || '[]')
+        users.push({ name, email, password })
+        localStorage.setItem('users', JSON.stringify(users))
+      } catch (err) {
+        console.error('Failed to save user to localStorage', err)
+      }
+      setShowModal(true)
+      // redirect to login after brief delay
+      setTimeout(() => {
+        navigate('/login')
+      }, 1200)
     }
   }
 
   return (
     <main>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h4>Signup successful</h4>
+            <p>Opening login page...</p>
+          </div>
+        </div>
+      )}
       <div className="container">
         <h3>Sign up</h3>
         <form onSubmit={submit}>

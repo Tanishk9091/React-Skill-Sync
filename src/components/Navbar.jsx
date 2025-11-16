@@ -1,9 +1,24 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Navbar({ email, onLogout }) {
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
   const closeMenu = () => setOpen(false)
+
+  const handleLoginClick = (e) => {
+    e.preventDefault()
+    closeMenu()
+    try {
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      if (users && users.length > 0) navigate('/login')
+      else navigate('/signup')
+    } catch (err) {
+      // on error, default to signup
+      navigate('/signup')
+    }
+  }
+
   return (
     <header>
       <div id="navbar" className="obj-width">
@@ -20,7 +35,7 @@ export default function Navbar({ email, onLogout }) {
             </>
           ) : (
             <>
-              <li><Link to="/login" onClick={closeMenu}>Login</Link></li>
+              <li><a href="#" onClick={handleLoginClick}>Login</a></li>
               <li><Link to="/signup" id="w-btn" onClick={closeMenu}>Register</Link></li>
             </>
           )}

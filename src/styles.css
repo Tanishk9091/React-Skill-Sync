@@ -2,7 +2,7 @@
   /* Professional color palette */
   --primary-color: #0B4A6F; /* deep teal/blue */
   --primary-dark: #07263b;  /* darker footer / accents */
-  --accent-color: #FFB86B;  /* warm, muted orange */
+  --accent-color: #60A5FA;  /* light blue accent */
   --text-dark: #0F1724;     /* very dark slate */
   --text-light: #ffffff;
   --text-muted: #6b7280;
@@ -74,4 +74,33 @@ body { margin: 0; font-family: Poppins, system-ui, -apple-system, Segoe UI, Robo
 .jobs-container a.job-listings-link { display: block; max-width: 100%; }
 .jobs-container .jlist { margin: 0; }
 .jobs-container { overflow-x: hidden; }
+
+/* Modal for login confirmation */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal {
+  background: var(--surface);
+  color: var(--text-dark);
+  padding: 18px 20px;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(2,6,23,0.3);
+  min-width: 260px;
+  text-align: center;
+}
+.modal h4 { margin: 0 0 8px 0; }
+.modal p { margin: 0; color: var(--text-muted); }
+
+/* Apply modal tweaks */
+.apply-modal { min-width: 360px; max-width: 760px; padding: 18px; }
+.apply-modal input[type="file"] { margin-top: 6px; }
+.apply-modal textarea { min-height: 80px; resize: vertical; }
+.apply-modal label { display: block; font-weight: 600; font-size: 14px; color: var(--text-dark); }
+.apply-modal input, .apply-modal textarea { width: 100%; padding: 8px; margin-top: 6px; border: 1px solid var(--border); border-radius: 6px; }
 

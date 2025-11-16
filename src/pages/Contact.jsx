@@ -2,16 +2,37 @@ import React, { useState } from 'react'
 
 export default function Contact() {
   const [status, setStatus] = useState('')
+
+  const validateEmail = (value) => {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return re.test(String(value).toLowerCase())
+  }
+
   const onSubmit = (e) => {
     e.preventDefault()
     const form = e.currentTarget
     const data = Object.fromEntries(new FormData(form).entries())
-    setStatus('Sending...')
-    setTimeout(() => {
-      console.log('Contact form submission', data)
-      setStatus('Thanks! We received your message.')
+    // simple validation
+    if (!data.name || !data.email || !data.message) {
+      setStatus('Please fill all required fields.')
+      return
+    }
+    if (!validateEmail(data.email)) {
+      setStatus('Please enter a valid email address.')
+      return
+    }
+
+    // Save submission locally so you can review it later in devtools/localStorage
+    try {
+      const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]')
+      messages.push({ name: data.name, email: data.email, message: data.message, submittedAt: new Date().toISOString() })
+      localStorage.setItem('contactMessages', JSON.stringify(messages))
+      setStatus('Thanks! Your message was saved locally.');
       form.reset()
-    }, 600)
+    } catch (err) {
+      console.error('Failed to save contact message', err)
+      setStatus('There was an error saving your message locally.')
+    }
   }
   return (
     <main className="sec-space">

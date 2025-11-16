@@ -557,7 +557,7 @@ body {
 .jobs .jlist span#key {
     margin-left: auto;
     font-size: 0.8rem;
-    background-color: #F3F7FB;
+    background-color: #E8F4FF; /* light blue background */
     color: var(--primary-color);
     padding: 10px 20px;
     border-radius: 20px;
@@ -613,8 +613,8 @@ body {
     font-weight: 500;
 }
 .jList span {
-    background-color: #FDF7F1;
-    color: #B06B2A;
+    background-color: #E8F4FF; /* normalize to light blue */
+    color: #1E5BA8; /* blue tone */
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -739,8 +739,8 @@ a.job-listings-link {
 }
 
 .skill-tags span {
-    background-color: #f0eaff;
-    color: #8c52ff;
+    background-color: #EAF4FF; /* subtle blue badge */
+    color: #2563EB; /* blue */
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -1471,7 +1471,7 @@ container-page textarea,
   /* ensure variables are available if this file is loaded standalone */
   --primary-color: #0B4A6F;
   --primary-dark: #07263b;
-  --accent-color: #FFB86B;
+    --accent-color: #60A5FA;
   --text-dark: #0F1724;
   --text-light: #ffffff;
   --text-muted: #6b7280;
@@ -1504,7 +1504,7 @@ container-page textarea,
 .jobs .jlist p { color: #55617a; }
 .jobs .jlist span#key { color: var(--primary-color) !important; }
 .job .job-id li.active { background-color: var(--primary-color) !important; color: var(--text-light) !important; }
-.skill-tags span { background-color: #FDF7F1 !important; color: #B06B2A !important; }
+.skill-tags span { background-color: #EAF4FF !important; color: #2563EB !important; }
 .badge { background: var(--surface) !important; border-color: var(--border) !important; }
 .freelancer-card img { border-color: var(--border) !important; }
 .error-message { color: #ff6b6b; }

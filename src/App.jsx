@@ -209,6 +209,20 @@ function JobDetail() {
   const id = Number(window.location.pathname.split('/').pop())
   const job = JOBS.find(j => j.index === id)
   if (!job) return <Navigate to="/jobs" replace />
+  const [showApply, setShowApply] = useState(false)
+  const [form, setForm] = useState({ name: '', qualification: '', experience: '', cover: '', resume: null })
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const loggedEmail = typeof window !== 'undefined' ? localStorage.getItem('loggedInUserEmail') || '' : ''
+
+  // Prefill name from email if available
+  useEffect(() => {
+    if (loggedEmail && !form.name) {
+      setForm(f => ({ ...f, name: loggedEmail.split('@')[0] }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedEmail])
   return (
     <div id="jobDetails" className="extra-space obj-width">
       <div className="job-header">
@@ -219,8 +233,95 @@ function JobDetail() {
             <span>{job.location}</span>
           </div>
         </div>
-        <a id="g-btn" href="#">Apply Now</a>
+        <button id="g-btn" className="btn" onClick={() => setShowApply(true)}>Apply Now</button>
       </div>
+
+      {showApply && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target.className === 'modal-overlay') setShowApply(false) }}>
+          <div className="modal apply-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Apply for: {job.title}</h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const next = {}
+              if (!form.name.trim()) next.name = 'Full name is required.'
+              if (!form.qualification.trim()) next.qualification = 'Qualification is required.'
+              if (!form.experience.toString().trim()) next.experience = 'Experience is required.'
+              else if (isNaN(Number(form.experience))) next.experience = 'Experience must be a number (years).'
+              if (!form.resume) next.resume = 'Please upload your resume (PDF/DOC).'
+              setErrors(next)
+              if (Object.keys(next).length === 0) {
+                setSubmitting(true)
+                try {
+                  // read resume as base64 (small files only)
+                  let resumeData = null
+                  if (form.resume) {
+                    resumeData = await new Promise((resolve, reject) => {
+                      const reader = new FileReader()
+                      reader.onload = () => resolve(reader.result)
+                      reader.onerror = reject
+                      reader.readAsDataURL(form.resume)
+                    })
+                  }
+                  const applications = JSON.parse(localStorage.getItem('applications') || '[]')
+                  applications.push({
+                    jobId: job.index,
+                    jobTitle: job.title,
+                    name: form.name,
+                    email: loggedEmail,
+                    qualification: form.qualification,
+                    experience: form.experience,
+                    cover: form.cover,
+                    resumeName: form.resume ? form.resume.name : null,
+                    resumeData,
+                    appliedAt: new Date().toISOString()
+                  })
+                  localStorage.setItem('applications', JSON.stringify(applications))
+                  setSuccess(true)
+                  // clear form after success
+                  setForm({ name: loggedEmail ? loggedEmail.split('@')[0] : '', qualification: '', experience: '', cover: '', resume: null })
+                  setTimeout(() => { setShowApply(false); setSuccess(false) }, 1400)
+                } catch (err) {
+                  console.error(err)
+                } finally {
+                  setSubmitting(false)
+                }
+              }
+            }}>
+              <div style={{ display: 'grid', gap: 8 }}>
+                <label>Full name
+                  <input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
+                </label>
+                {errors.name && <div style={{ color: 'red' }}>{errors.name}</div>}
+
+                <label>Qualification
+                  <input value={form.qualification} onChange={(e) => setForm(f => ({ ...f, qualification: e.target.value }))} />
+                </label>
+                {errors.qualification && <div style={{ color: 'red' }}>{errors.qualification}</div>}
+
+                <label>Experience (years)
+                  <input value={form.experience} onChange={(e) => setForm(f => ({ ...f, experience: e.target.value }))} />
+                </label>
+                {errors.experience && <div style={{ color: 'red' }}>{errors.experience}</div>}
+
+                <label>Resume (PDF/DOC)
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setForm(f => ({ ...f, resume: e.target.files[0] }))} />
+                </label>
+                {errors.resume && <div style={{ color: 'red' }}>{errors.resume}</div>}
+
+                <label>Cover letter / Extra info
+                  <textarea value={form.cover} onChange={(e) => setForm(f => ({ ...f, cover: e.target.value }))} />
+                </label>
+
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button type="button" className="btn" onClick={() => setShowApply(false)}>Cancel</button>
+                  <button type="submit" className="btn" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Application'}</button>
+                </div>
+                {success && <div style={{ color: 'green', textAlign: 'center' }}>Application submitted ✓</div>}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <div className="features sec-space">
         <div className="fe-box">
           <div><img src="/vacancy.png" alt="" /><h3>Vacancy</h3><p>{job.vacancy}</p></div>
